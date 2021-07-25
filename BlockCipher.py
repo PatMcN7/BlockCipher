@@ -1,7 +1,7 @@
 #this program made by Patrick James McNaughton. Contact me at patmcn300@outlook.com, Github: PatMcN7
 
 #padding the message (breaking it into chunks)
-def pad_message(message, block_size = 4):
+def pad_message(message, block_size=4):
     message_list = []
     chunk = 0
     block_count = len(message) // block_size + 1
@@ -11,11 +11,14 @@ def pad_message(message, block_size = 4):
             chunk += ord(message[c])
         else:
             chunk += 0
+        if chunk.bit_length() > (block_size - 1) * 8:
+            message_list.append(chunk)
+            chunk = 0
     return message_list
 
 #rebuilding the message
 def rebuild_message(message_list, block_size = 4):
-    message = ''
+    message = ""
     for i in range(len(message_list)):
         chunk = message_list[i]
         for c in range(block_size):
@@ -23,13 +26,14 @@ def rebuild_message(message_list, block_size = 4):
             message += chr(number)
     return message
 
+
 #Shifting the blocks
-def apply_rotate(message_list, key, block_size = 4):
+def apply_shift(message_list, key, block_size = 4):
     cipher_list = []
     bit_max = block_size * 8
     for i in range(len(message_list)):
-        chunk = message_list
-        carry = chunk % 2 ** key
+        chunk = message_list[i]
+        carry = chunk % (2 ** key)
         carry = carry <<  (bit_max - key)
         cipher = (chunk >> key) + carry
         cipher_list.append(cipher)
@@ -46,4 +50,15 @@ def undo_shift(cipher_list, key, block_size=4):
         message_list.append(number)
     return message_list
 
-
+plaintext = "Hello test old friend"
+# Set the key as the number of bits to rotate in each block
+key = 20
+text_list = pad_message(plaintext)
+# print(text_list)
+cipher_list = apply_shift(text_list, key)
+# print(cipher_list)
+cipher = rebuild_message(cipher_list)
+print(cipher)
+message_list = undo_shift(cipher_list, key)
+message = rebuild_message(message_list)
+print(message)
